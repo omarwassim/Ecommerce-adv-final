@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Project - Team 3": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:58332;http://localhost:58333"
+    }
+  }
+}
