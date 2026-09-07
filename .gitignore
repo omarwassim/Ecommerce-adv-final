@@ -1,0 +1,36 @@
+# .NET build files
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# Visual Studio user files
+*.user
+*.suo
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Test results
+TestResults/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# Environment variables / secrets
+.env
+.env.*
+
+# Local databases
+*.db
+*.db-shm
+*.db-wal
+
+# OS files
+.DS_Store
+Thumbs.db
