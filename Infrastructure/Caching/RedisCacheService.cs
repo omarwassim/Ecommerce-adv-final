@@ -27,4 +27,16 @@ public class RedisCacheService : ICacheService
 
     public async Task RemoveAsync(string key, CancellationToken ct = default) =>
         await Db.KeyDeleteAsync(key);
+
+    public async Task RemoveByPrefixAsync(string prefix, CancellationToken ct = default)
+    {
+        // Redis has no "delete by prefix" command - SCAN (not KEYS, which blocks the whole
+        // server on a large keyspace) finds matching keys in batches, then delete each batch.
+        var endpoints = _redis.GetEndPoints();
+        var server = _redis.GetServer(endpoints.First());
+
+        var keys = server.Keys(pattern: $"{prefix}*").ToArray();
+        if (keys.Length > 0)
+            await Db.KeyDeleteAsync(keys);
+    }
 }

@@ -15,6 +15,8 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         b.Property(p => p.ImageUrl).HasMaxLength(1000);
         b.Property(p => p.Category).HasMaxLength(100);
         b.Property(p => p.CreatedAtUtc).HasDefaultValueSql("GETUTCDATE()");
+        b.Property(p => p.PhotoUrl).HasMaxLength(1000);
+        b.Property(p => p.DiscountPercentage).HasColumnType("decimal(5,2)");
 
         // Money is a value object (record), mapped as an EF owned type so it stays a real
         // object in C# (Product.Price.Amount / .Currency) but two plain columns in SQL.
@@ -25,5 +27,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
         });
 
         b.HasIndex(p => p.Category);
+        // Product listing is always sorted by this (see ProductRepository.GetPagedAsync).
+        b.HasIndex(p => p.DisplayOrder);
     }
 }

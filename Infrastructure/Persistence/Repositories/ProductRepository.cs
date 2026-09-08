@@ -28,7 +28,7 @@ public class ProductRepository : IProductRepository
 
         var total = await query.CountAsync(ct);
         var items = await query
-            .OrderBy(p => p.Id)
+            .OrderBy(p => p.DisplayOrder)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
@@ -50,4 +50,20 @@ public class ProductRepository : IProductRepository
     }
 
     public void Update(Product product) => _db.Products.Update(product);
+
+    public async Task AddAsync(Product product, CancellationToken ct = default) =>
+        await _db.Products.AddAsync(product, ct);
+
+    public async Task<int> GetMaxDisplayOrderAsync(CancellationToken ct = default) =>
+        await _db.Products.AnyAsync(ct) ? await _db.Products.MaxAsync(p => p.DisplayOrder, ct) : 0;
+
+    public async Task DeleteAsync(int id, CancellationToken ct = default)
+    {
+        var product = await GetByIdAsync(id, ct);
+        if (product is not null)
+            _db.Products.Remove(product);
+    }
+
+    public Task<List<Product>> GetAllActiveAsync(CancellationToken ct = default) =>
+        _db.Products.Where(p => p.IsActive).ToListAsync(ct);
 }

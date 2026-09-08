@@ -24,11 +24,28 @@ public class Order
     public DateTime? PaidAtUtc { get; set; }
     public DateTime? ConfirmedAtUtc { get; set; }
 
+    /// <summary>0 when no discount applied. Set once, at checkout, by ApplyOrderLevelDiscount -
+    /// never changed afterward, same "snapshot, don't reference live data" rule as price.</summary>
+    public decimal AppliedDiscountPercentage { get; set; }
+
+    /// <summary>Human-readable reason the discount was applied - "FirstPurchase",
+    /// "PostOrderWindow", or null if none. Purely informational (for the order history /
+    /// admin view), Total already reflects the discount regardless.</summary>
+    public string? DiscountSource { get; set; }
+
     /// <summary>Set when the order goes to Compensated — why the refund happened.</summary>
     public string? CompensationReason { get; set; }
 
     public ICollection<OrderItem> Items { get; set; } = new List<OrderItem>();
     public Payment? Payment { get; set; }
+
+    /// <summary>Called once, before Total is computed from the subtotal - see PlaceOrderHandler.
+    /// Never called twice on the same order (there's only one discount per order).</summary>
+    public void ApplyOrderLevelDiscount(decimal percentage, string source)
+    {
+        AppliedDiscountPercentage = percentage;
+        DiscountSource = source;
+    }
 
     public void MarkPaid()
     {

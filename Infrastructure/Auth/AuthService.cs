@@ -52,7 +52,7 @@ public class AuthService : IAuthService
             Email = email,
             PasswordHash = HashPassword(password),
             FullName = fullName,
-            Role = UserRole.Customer
+            Role = UserRole.User
         };
 
         await _db.Users.AddAsync(user, ct);

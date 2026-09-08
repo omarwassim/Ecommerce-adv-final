@@ -31,16 +31,13 @@ public static class DependencyInjection
         services.AddScoped<ICartRepository, CartRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+        services.AddScoped<IUserDiscountRepository, UserDiscountRepository>();
 
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<IIdempotencyStore, RedisIdempotencyStore>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<IPaymentService, StripePaymentService>();
         services.AddScoped<IAuditLogger, SerilogAuditLogger>();
-
-        // IUserDiscountRepository is intentionally NOT registered yet - blocked on Rahaf
-        // fixing UserDiscount (currently only an enum, no entity class) and the interface's
-        // method signatures. See INFRASTRUCTURE_SETUP.md for the full gap list.
 
         // Rate limiting is registered from the Ecommerce (WebApi) project instead of here -
         // AddRateLimiter lives in the ASP.NET Core shared framework, which a plain class

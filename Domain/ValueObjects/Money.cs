@@ -32,6 +32,16 @@ public sealed record Money
         return new Money(Amount + other.Amount, Currency);
     }
 
+    /// <summary>Applies a 0-100 percentage discount, e.g. ApplyDiscountPercentage(15) takes 15% off.</summary>
+    public Money ApplyDiscountPercentage(decimal percentage)
+    {
+        if (percentage < 0 || percentage > 100)
+            throw new DomainException("Discount percentage must be between 0 and 100.");
+
+        var discounted = Amount * (1 - percentage / 100m);
+        return new Money(discounted, Currency);
+    }
+
     public Money Multiply(int quantity)
     {
         if (quantity < 0)

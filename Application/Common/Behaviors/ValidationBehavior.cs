@@ -1,6 +1,5 @@
 ﻿using FluentValidation;
 using MediatR;
-using System.ComponentModel.DataAnnotations;
 
 namespace EcommerceSystem.Application.Common.Behaviors;
 

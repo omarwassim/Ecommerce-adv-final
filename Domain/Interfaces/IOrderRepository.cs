@@ -20,4 +20,15 @@ public interface IOrderRepository
         int userId, int page, int pageSize, CancellationToken ct = default);
 
     Task AddAsync(Order order, CancellationToken ct = default);
+
+    /// <summary>Count of this user's orders that ever reached Confirmed - used to decide
+    /// FirstPurchase discount eligibility ("is this their first completed order?").</summary>
+    Task<int> GetCompletedOrderCountAsync(int userId, CancellationToken ct = default);
+
+    /// <summary>Units sold and revenue per product, summed across every OrderItem that ever
+    /// belonged to a Confirmed order. Backs GetSalesAnalyticsHandler's most-sold/distribution
+    /// view - Confirmed only, so a failed/compensated order never inflates the numbers.</summary>
+    Task<IReadOnlyList<ProductSalesSummary>> GetProductSalesSummaryAsync(CancellationToken ct = default);
 }
+
+public record ProductSalesSummary(int ProductId, string ProductName, int UnitsSold, decimal Revenue);

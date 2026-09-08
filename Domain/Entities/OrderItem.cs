@@ -20,7 +20,12 @@ public class OrderItem
     /// </summary>
     public Money UnitPriceAtPurchase { get; set; } = default!;
 
+    /// <summary>Item-level admin discount snapshotted at checkout (from
+    /// Product.GetEffectiveDiscountPercentage) - same "snapshot, don't reference live data"
+    /// rule as price. 0 when the product had no active discount at purchase time.</summary>
+    public decimal DiscountPercentageAtPurchase { get; set; }
+
     public int Quantity { get; set; }
 
-    public Money LineTotal => UnitPriceAtPurchase.Multiply(Quantity);
+    public Money LineTotal => UnitPriceAtPurchase.ApplyDiscountPercentage(DiscountPercentageAtPurchase).Multiply(Quantity);
 }

@@ -1,4 +1,4 @@
-﻿namespace EcommerceSystem.Domain.Enums;
+namespace EcommerceSystem.Domain.Enums;
 
 /// <summary>
 /// FirstPurchase  -> granted implicitly, available until redeemed on the user's first order

@@ -1,4 +1,5 @@
 using EcommerceSystem.Domain.Entities;
+using EcommerceSystem.Domain.Enums;
 using EcommerceSystem.Domain.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -36,4 +37,37 @@ public class OrderRepository : IOrderRepository
 
     public async Task AddAsync(Order order, CancellationToken ct = default) =>
         await _db.Orders.AddAsync(order, ct);
+
+    public Task<int> GetCompletedOrderCountAsync(int userId, CancellationToken ct = default) =>
+        _db.Orders.CountAsync(o => o.UserId == userId && o.Status == OrderStatus.Confirmed, ct);
+
+    public async Task<IReadOnlyList<ProductSalesSummary>> GetProductSalesSummaryAsync(CancellationToken ct = default)
+    {
+        var confirmedOrderIds = _db.Orders
+            .Where(o => o.Status == OrderStatus.Confirmed)
+            .Select(o => o.Id);
+
+        var summary = await _db.OrderItems
+            .Where(oi => confirmedOrderIds.Contains(oi.OrderId))
+            .GroupBy(oi => new { oi.ProductId, oi.ProductNameSnapshot })
+            .Select(g => new
+            {
+                g.Key.ProductId,
+                g.Key.ProductNameSnapshot,
+                UnitsSold = g.Sum(oi => oi.Quantity),
+                // LineTotal is computed in C# (Money math), not translatable to SQL - sum the
+                // raw stored columns instead and apply the discount here.
+                GrossAmount = g.Sum(oi => oi.UnitPriceAtPurchase.Amount * oi.Quantity),
+                AvgDiscount = g.Average(oi => oi.DiscountPercentageAtPurchase)
+            })
+            .ToListAsync(ct);
+
+        return summary
+            .Select(s => new ProductSalesSummary(
+                s.ProductId,
+                s.ProductNameSnapshot,
+                s.UnitsSold,
+                Math.Round(s.GrossAmount * (1 - s.AvgDiscount / 100m), 2)))
+            .ToList();
+    }
 }

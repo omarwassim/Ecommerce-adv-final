@@ -21,5 +21,17 @@ public interface IProductRepository
     /// </summary>
     Task<Product?> GetByIdForUpdateAsync(int id, CancellationToken ct = default);
 
+    Task AddAsync(Product product, CancellationToken ct = default);
+
+    /// <summary>For DisplayOrder auto-increment: admin leaves DisplayOrder null on create,
+    /// handler sets it to this + 1. Returns 0 if there are no products yet.</summary>
+    Task<int> GetMaxDisplayOrderAsync(CancellationToken ct = default);
+
+    Task DeleteAsync(int id, CancellationToken ct = default);
+
+    /// <summary>Every active product, unpaged - used for storewide discount application only.
+    /// Never call this for a customer-facing listing (see GetPagedAsync for that).</summary>
+    Task<List<Product>> GetAllActiveAsync(CancellationToken ct = default);
+
     void Update(Product product);
 }
