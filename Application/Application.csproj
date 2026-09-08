@@ -21,4 +21,8 @@
 		<ProjectReference Include="..\Domain\EcommerceSystem.Domain.csproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Features\Admin\Analytics\Handlers\" />
+	</ItemGroup>
+
 </Project>
