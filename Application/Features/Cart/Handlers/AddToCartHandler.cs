@@ -30,14 +30,18 @@ public sealed class AddToCartHandler : IRequestHandler<AddToCartCommand, CartDto
             throw new InsufficientStockException(product.Id);
 
         var cart = await _cartRepository.GetByUserIdAsync(request.UserId, ct);
-        if (cart is null)
+        var isNewCart = cart is null;
+        if (isNewCart)
         {
             cart = new DomainCart { UserId = request.UserId };
             await _cartRepository.AddAsync(cart, ct);
         }
 
-        cart.AddItem(request.ProductId, request.Quantity);
-        _cartRepository.Update(cart);
+        cart!.AddItem(request.ProductId, request.Quantity);
+
+        if (!isNewCart)
+            _cartRepository.Update(cart);
+
         await _unitOfWork.SaveChangesAsync(ct);
 
         return cart.Adapt<CartDto>();

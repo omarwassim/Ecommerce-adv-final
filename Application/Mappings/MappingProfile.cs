@@ -24,6 +24,10 @@ public sealed class MappingProfile : IRegister
             .Map(dest => dest.ProductName, src => src.Product != null ? src.Product.Name : string.Empty)
             .Map(dest => dest.UnitPrice, src => src.Product != null ? src.Product.Price.Amount : 0)
             .Map(dest => dest.LineTotal, src => src.Product != null ? src.Product.Price.Amount * src.Quantity : 0);
+       
+        // Cart has no Total property of its own - computed here from each item's price.
+        config.NewConfig<Cart, CartDto>()
+            .Map(dest => dest.Total, src => src.Items.Sum(i => i.Product != null ? i.Product.Price.Amount * i.Quantity : 0));
 
         config.NewConfig<Order, OrderDto>()
             .Map(dest => dest.Status, src => src.Status.ToString())
