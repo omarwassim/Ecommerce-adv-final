@@ -2,7 +2,6 @@
 using EcommerceSystem.Application.Features.Orders.Commands;
 using EcommerceSystem.Application.Interfaces;
 using EcommerceSystem.Domain.Entities;
-using EcommerceSystem.Domain.Enums;
 using EcommerceSystem.Domain.Exceptions;
 using EcommerceSystem.Domain.Interfaces;
 using EcommerceSystem.Domain.ValueObjects;
@@ -16,7 +15,6 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
     private readonly ICartRepository _cartRepository;
     private readonly IProductRepository _productRepository;
     private readonly IOrderRepository _orderRepository;
-    private readonly IUserDiscountRepository _userDiscountRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IPaymentService _paymentService;
     private readonly IIdempotencyStore _idempotencyStore;
@@ -25,7 +23,6 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
         ICartRepository cartRepository,
         IProductRepository productRepository,
         IOrderRepository orderRepository,
-        IUserDiscountRepository userDiscountRepository,
         IUnitOfWork unitOfWork,
         IPaymentService paymentService,
         IIdempotencyStore idempotencyStore)
@@ -33,7 +30,6 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
         _cartRepository = cartRepository;
         _productRepository = productRepository;
         _orderRepository = orderRepository;
-        _userDiscountRepository = userDiscountRepository;
         _unitOfWork = unitOfWork;
         _paymentService = paymentService;
         _idempotencyStore = idempotencyStore;
@@ -61,16 +57,14 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
         if (cart.Items.Count == 0)
             throw new CartEmptyException();
 
-        var nowUtc = DateTime.UtcNow;
         await _unitOfWork.BeginTransactionAsync(ct);
 
         Order order;
-        UserDiscount? consumedUserDiscount = null;
         try
         {
-            // --- Step 3: reserve stock + snapshot prices AND each item's active discount ---
+            // --- Step 3: reserve stock + snapshot prices, inside the transaction ---
             var orderItems = new List<OrderItem>();
-            var subtotal = Money.Zero();
+            var total = Money.Zero();
 
             foreach (var cartItem in cart.Items)
             {
@@ -88,53 +82,25 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
                     ProductId = product.Id,
                     ProductNameSnapshot = product.Name,
                     UnitPriceAtPurchase = product.Price, // <- snapshot, not a live reference
-                    DiscountPercentageAtPurchase = product.GetEffectiveDiscountPercentage(nowUtc), // <- item-level admin discount, also snapshotted
                     Quantity = cartItem.Quantity
                 };
                 orderItems.Add(orderItem);
-                subtotal = subtotal.Add(orderItem.LineTotal);
+                total = total.Add(orderItem.LineTotal);
             }
 
             order = new Order
             {
                 UserId = request.UserId,
                 IdempotencyKey = request.IdempotencyKey,
+                Total = total,
                 Items = orderItems
             };
 
-            // --- Step 3b: resolve the order-level personal discount (FirstPurchase beats PostOrderWindow) ---
-            var priorOrderCount = await _orderRepository.GetCompletedOrderCountAsync(request.UserId, ct);
-
-            if (priorOrderCount == 0)
-            {
-                order.ApplyOrderLevelDiscount(15.00m, "FirstPurchase");
-            }
-            else
-            {
-                var postOrderDiscount = await _userDiscountRepository.GetActiveAsync(
-                    request.UserId, UserDiscountType.PostOrderWindow, nowUtc, ct);
-
-                if (postOrderDiscount is not null)
-                {
-                    order.ApplyOrderLevelDiscount(postOrderDiscount.DiscountPercentage, "PostOrderWindow");
-                    consumedUserDiscount = postOrderDiscount;
-                }
-            }
-
-            order.Total = subtotal.ApplyDiscountPercentage(order.AppliedDiscountPercentage);
-
             await _orderRepository.AddAsync(order, ct);
-
-            if (consumedUserDiscount is not null)
-            {
-                consumedUserDiscount.MarkUsed(nowUtc);
-                _userDiscountRepository.Update(consumedUserDiscount);
-            }
-
             await _unitOfWork.SaveChangesAsync(ct);
 
             // --- Step 4: charge payment ---
-            var paymentResult = await _paymentService.ChargeAsync(order.Id, order.Total.Amount, order.Total.Currency, ct);
+            var paymentResult = await _paymentService.ChargeAsync(order.Id, total.Amount, total.Currency, ct);
 
             if (!paymentResult.Succeeded)
             {
@@ -152,12 +118,6 @@ public sealed class PlaceOrderHandler : IRequestHandler<PlaceOrderCommand, Order
             {
                 order.Confirm();
                 await _unitOfWork.SaveChangesAsync(ct);
-
-                // Order fully succeeded — grant the 72h post-order discount window.
-                var postOrderWindow = UserDiscount.CreatePostOrderWindow(request.UserId, order.Id, nowUtc);
-                await _userDiscountRepository.AddAsync(postOrderWindow, ct);
-                await _unitOfWork.SaveChangesAsync(ct);
-
                 await _unitOfWork.CommitTransactionAsync(ct);
             }
             catch (Exception confirmEx)

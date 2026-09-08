@@ -1,0 +1,8 @@
+services:
+  redis:
+    image: redis:7
+    container_name: ecommerce-redis
+    ports:
+      - "6379:6379"
+
+# SQL Server is local via SSMS, not Docker - only Redis needs a container.

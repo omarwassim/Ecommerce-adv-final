@@ -1,15 +1,56 @@
+using System.Text;
+using EcommerceSystem.Application;
+using Ecommerce.RateLimiting;
+using Infrastructure;
+using Infrastructure.Auth;
+using Infrastructure.Logging;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using Serilog;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// --- Logging (Reem's Infrastructure/Logging/SerilogConfig.cs) ---
+builder.Host.UseSerilog((context, services, config) =>
+    SerilogConfig.Configure(config, context.HostingEnvironment));
+
+// --- Layer wiring ---
+builder.Services.AddApplication();          // MediatR handlers, FluentValidation, Mapster (Omar)
+builder.Services.AddInfrastructure(builder.Configuration); // repos, DbContext, cache, auth, payments (Reem)
+builder.Services.AddApiRateLimiting();
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo { Title = "Ecommerce API", Version = "v1" });
+});
+
+// --- Auth: JWT bearer validation (token issuing itself lives in Infrastructure/Auth) ---
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>() ?? new JwtSettings();
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings.Issuer,
+            ValidAudience = jwtSettings.Audience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Secret))
+        };
+    });
+builder.Services.AddAuthorization(options => options.AddAdminOnlyPolicy());
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// TODO(Mariam/Reem): plug in ExceptionHandlingMiddleware here once it exists, before
+// anything else in the pipeline, so every unhandled DomainException maps to the
+// consistent error contract instead of leaking a raw stack trace.
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -18,6 +59,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseRateLimiter();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>net10.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<RootNamespace>EcommerceSystem.Application</RootNamespace>
@@ -18,11 +18,26 @@
 	<ItemGroup>
 		<!-- Only reference to Domain. No EF Core, no Redis, no Stripe, no OpenAI here. -->
 		<ProjectReference Include="..\Domain\Domain.csproj" />
-		<ProjectReference Include="..\Domain\EcommerceSystem.Domain.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Folder Include="Features\Admin\Analytics\Handlers\" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- TEMPORARILY EXCLUDED FROM BUILD - Reem, 2026-09-08.
+		     These call Product fields (PhotoUrl, DisplayOrder, DiscountPercentage,
+		     DiscountStartsAtUtc, DiscountEndsAtUtc), IProductRepository methods (AddAsync,
+		     GetMaxDisplayOrderAsync), and ICacheService.RemoveByPrefixAsync that don't exist
+		     yet on Domain/Application - the whole solution won't compile with them included.
+		     Remove this ItemGroup once Rahaf adds the Product fields + repository methods and
+		     Omar adds ICacheService.RemoveByPrefixAsync. See INFRASTRUCTURE_SETUP.md §7 for
+		     the full gap list. -->
+		<Compile Remove="Features\Admin\Products\Handlers\CreateProductHandler.cs" />
+		<Compile Remove="Features\Admin\Products\Handlers\UpdateProductHandler.cs" />
+		<Compile Remove="Features\Admin\Products\Handlers\Deleteproducthandler.cs" />
+		<Compile Remove="Features\Admin\Discounts\Handlers\Setproductdiscounthandler.cs" />
+		<Compile Remove="Features\Admin\Discounts\Handlers\Setstorewidediscounthandler.cs" />
 	</ItemGroup>
 
 </Project>

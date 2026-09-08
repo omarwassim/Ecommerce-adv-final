@@ -1,4 +1,3 @@
-﻿using Abp.Auditing;
 using EcommerceSystem.Domain.Entities;
 
 namespace EcommerceSystem.Domain.Interfaces;

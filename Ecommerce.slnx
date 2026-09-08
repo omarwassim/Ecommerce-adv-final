@@ -1,5 +1,6 @@
 <Solution>
-  <Project Path="Application/Application.csproj" Id="a4398fdf-e15e-43da-af0e-f087141ea678" />
   <Project Path="Domain/Domain.csproj" />
+  <Project Path="Application/Application.csproj" />
+  <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Ecommerce/Ecommerce.csproj" />
 </Solution>
