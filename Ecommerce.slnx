@@ -3,4 +3,5 @@
   <Project Path="Application/Application.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" />
   <Project Path="Ecommerce/Ecommerce.csproj" />
+  <Project Path="tests/EcommerceSystem.IntegrationTests/EcommerceSystem.IntegrationTests.csproj" />
 </Solution>
