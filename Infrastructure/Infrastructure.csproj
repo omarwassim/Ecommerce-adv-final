@@ -30,10 +30,4 @@
     <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <!-- Mariam's AI folder lives in this project per the team doc - not created here so it
-         doesn't collide with her branch. -->
-    <Folder Include="AI\" />
-  </ItemGroup>
-
 </Project>
