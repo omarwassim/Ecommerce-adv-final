@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#15130F" />
+  <!-- simple action-figure silhouette -->
+  <g fill="#F1ECE2">
+    <circle cx="16" cy="7" r="3" />
+    <path d="M13 11h6l1 7h-8z" />
+    <path d="M11 12l2 1-1 5-2-1z" />
+    <path d="M21 12l-2 1 1 5 2-1z" />
+    <path d="M13.5 18h2.2l-.4 7h-2.2z" />
+    <path d="M16.3 18h2.2l1 7h-2.2z" />
+  </g>
+  <rect x="6" y="27" width="20" height="2" rx="1" fill="#E33A2B" />
+</svg>

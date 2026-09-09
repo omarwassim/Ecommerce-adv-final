@@ -36,8 +36,17 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, RedisCacheService>();
         services.AddScoped<IIdempotencyStore, RedisIdempotencyStore>();
         services.AddScoped<IAuthService, AuthService>();
-        services.AddScoped<IPaymentService, StripePaymentService>();
         services.AddScoped<IAuditLogger, SerilogAuditLogger>();
+
+        // Real Stripe test-mode calls when a key is set; a local no-op fake otherwise
+        // (lets `dotnet run` do a full checkout with no Stripe account).
+        var stripeKey = config["Stripe:SecretKey"];
+        var hasRealStripeKey = !string.IsNullOrWhiteSpace(stripeKey)
+            && !stripeKey.Contains("REPLACE", StringComparison.OrdinalIgnoreCase);
+        if (hasRealStripeKey)
+            services.AddScoped<IPaymentService, StripePaymentService>();
+        else
+            services.AddScoped<IPaymentService, FakePaymentService>();
 
         // Rate limiting is registered from the Ecommerce (WebApi) project instead of here -
         // AddRateLimiter lives in the ASP.NET Core shared framework, which a plain class

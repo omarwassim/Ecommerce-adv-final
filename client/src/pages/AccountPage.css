@@ -1,0 +1,54 @@
+.account {
+  display: flex;
+  justify-content: center;
+}
+
+.account__form,
+.account__panel {
+  width: 100%;
+  max-width: 440px;
+  padding: 32px;
+}
+
+.account__form h1,
+.account__panel h1 {
+  font-size: 1.8rem;
+  margin: 6px 0 12px;
+}
+
+.account__hint {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-bottom: 18px;
+  line-height: 1.5;
+}
+
+.account__hint code {
+  background: var(--sand);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+.account__meta {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 6px 18px;
+  margin: 18px 0 24px;
+  font-size: 0.9rem;
+}
+
+.account__meta dt {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.account__meta dd {
+  margin: 0;
+}
+
+.account__links {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}

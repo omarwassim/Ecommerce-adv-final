@@ -1,0 +1,43 @@
+.discount-banner {
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 16px 0;
+  border: 1px solid transparent;
+}
+
+.discount-banner--guest {
+  background: var(--sand);
+  border-color: var(--line);
+}
+
+.discount-banner--first {
+  background: #eef1ff;
+  border-color: #c9d1ff;
+  color: var(--cobalt);
+}
+
+.discount-banner--window {
+  background: #fff5e0;
+  border-color: #f2d79a;
+  color: #7a5a10;
+}
+
+.discount-banner__cta {
+  flex-shrink: 0;
+  font-weight: 700;
+  border: 1px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 12px;
+  color: var(--ink);
+}
+
+.discount-banner__cta:hover {
+  background: var(--ink);
+  color: var(--bone);
+  text-decoration: none;
+}

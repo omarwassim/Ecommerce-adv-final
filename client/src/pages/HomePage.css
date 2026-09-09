@@ -1,0 +1,127 @@
+.home__hero {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: center;
+  border-bottom: 2px solid var(--ink);
+  overflow: hidden;
+  background: var(--ink);
+}
+
+.home__hero-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+.home__hero-copy {
+  position: relative;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 60px 20px;
+  color: var(--bone);
+}
+
+.home__hero-copy h1 {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  margin: 10px 0 14px;
+}
+
+.home__hero-copy p {
+  max-width: 44ch;
+  margin: 0 0 24px;
+  font-size: 1.05rem;
+  opacity: 0.9;
+}
+
+.home__hero-copy .eyebrow {
+  color: var(--sunburst);
+}
+
+.home__marquee {
+  background: var(--signal-red);
+  color: #fff;
+  overflow: hidden;
+  border-bottom: 2px solid var(--ink);
+  padding: 10px 0;
+}
+
+.home__marquee-track {
+  display: flex;
+  gap: 28px;
+  white-space: nowrap;
+  width: max-content;
+  animation: marquee 26s linear infinite;
+  font-family: var(--display);
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+}
+
+.home__marquee-dot {
+  opacity: 0.6;
+  margin-left: 24px;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.home__section {
+  margin: 48px 0;
+}
+
+.home__section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.home__section-head h2 {
+  font-size: 1.6rem;
+}
+
+.home__section-blurb {
+  color: var(--muted);
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+}
+
+.home__see-all {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.home__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .home__grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .home__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .home__marquee-track {
+    animation-duration: 18s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home__marquee-track {
+    animation: none;
+  }
+}

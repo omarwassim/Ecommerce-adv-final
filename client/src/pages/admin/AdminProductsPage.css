@@ -1,0 +1,37 @@
+.admin-products__form {
+  padding: 22px;
+  margin-bottom: 28px;
+}
+
+.admin-products__form h2 {
+  font-size: 1.15rem;
+  margin-bottom: 16px;
+}
+
+.admin-products__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0 16px;
+}
+
+.admin-products__wide {
+  grid-column: 1 / -1;
+}
+
+.admin-products__form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+@media (max-width: 900px) {
+  .admin-products__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-products__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -19,6 +19,23 @@ builder.Services.AddApplication();          // MediatR handlers, FluentValidatio
 builder.Services.AddInfrastructure(builder.Configuration); // repos, DbContext, cache, auth, payments (Reem)
 builder.Services.AddApiRateLimiting();
 
+// --- CORS: allow the React storefront (client/) to call the API in dev ---
+// Origins come from config key "Cors:AllowedOrigins" (array); falls back to the
+// common Vite dev ports. WithExposedHeaders keeps the Idempotency-Key round-trip visible.
+const string StorefrontCorsPolicy = "storefront";
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? new[]
+    {
+        "http://localhost:5173", "http://localhost:5174", "http://localhost:5175",
+        "https://localhost:5173",
+    };
+builder.Services.AddCors(options =>
+    options.AddPolicy(StorefrontCorsPolicy, policy => policy
+        .WithOrigins(allowedOrigins)
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .WithExposedHeaders("Idempotency-Key")));
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -79,6 +96,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(StorefrontCorsPolicy);
 
 app.UseRateLimiter();
 
